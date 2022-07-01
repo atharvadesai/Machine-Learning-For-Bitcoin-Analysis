@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Machine Learning for Bitcoin Analysis by noyebanji8</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Machine Learning for Bitcoin Analysis</h1>
+      <h2 class="project-tagline">CS 4641 Summer &#39;21 Group #1</h2>
+      <a href="https://github.gatech.edu/noyebanji8/bitcoin_analysis_group.io" class="btn">View on GitHub</a>
+    </section>
+
+    <section class="main-content">
+      <hr>
+<h3>
+<a id="introduction--background" class="anchor" href="#introduction--background" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Introduction &amp; Background</strong>
+</h3>
+<p>Today, the world of finance feels like it moves at lightspeed. Billions of bits, dollars, and transactions are exchanged every second. Money and our relationship with it are changing every day and there is no better example of this than Bitcoin.</p>
+<p>With such high throughput, it is nearly impossible for an average human to track all the price changes that Bitcoin goes through. We thus heavily rely on computers to generate most trade instructions. In fact, automated computer trading has become so prevalent that the U.S. Securities and Exchange Commission estimates that roughly 80% of all trades are executed by computer-powered algorithms. [1]</p>
+<h3>
+<a id="problem-definition" class="anchor" href="#problem-definition" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Problem Definition</strong>
+</h3>
+<p>Transactions occur too fast for humans to identify trends and respond to them correctly. Our team's objective is to use machine learning to efficiently perform sentiment and technical analysis on Bitcoin, recognize trends, and execute trades to generate portfolio growth and exceed the performance of simply holding Bitcoin over a timeframe. We will be using natural language processing for sentiment analysis and supervised/unsupervised machine learning for technical analysis. We will be using a Python library called Backtrader to facilitate portfolio and broker management.</p>
+<h3>
+<a id="data-collection" class="anchor" href="#data-collection" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Data Collection</strong>
+</h3>
+<p align="center">
+    <b>Sentiment Data Collection &amp; Preprocessing</b>
+</p>
+Five datasets were used to train the sentiment analysis model. The datasets are as follows:
+<ul>
+  <li>ABC World News Headlines from 2014-2020</li>
+  <li>Reddit World News Headlines from 2016-2020</li>
+  <li>CNBC Financial News Headlines from 2017-2020</li>
+  <li>Guardian Financial Headlines from 2017-2020</li>
+  <li>Reuters Financial Headlines from 2018-2020</li>
+</ul>
+<p>These datasets were obtained as .csv files from kaggle.com. Each dataset was read into a pandas dataframe. The dataframes were preprocessed and later merged into a single training dataframe to be used in supervised learning.</p>
+<p>Originally, all the datasets had “Time”, “Headlines”, and “Description” columns. For the pre-processing step, a python script was written to clean each .csv file. In each script, the headline dates were formatted into the proper datetime index format. All punctuation and numerical values from the headlines were removed. Any headlines sharing the same date were concatenated into a single string. The “Description” column was removed because the model was to be trained on the news headlines only.</p>
+<p align="center">
+    <b>Technical Data Collection &amp; Preprocessing</b>
+</p>
+<p>The technical data source was Yahoo Finance. The official Yahoo Finance API was discontinued a few years ago, but it is still being widely supported and is popular in algorithmic trading. With the Yahoo Finance API for Python and the DataFeeds functionality in Backtrader, we were able to download Bitcoin data in the following format:
+<img src="images/Data_Format.png" alt="dataFormat"></p>
+<p>This was convenient as the data could easily be downloaded as a .csv file and read into a pandas dataframe. This also made the data persistent and meant that we did not need to do any cleaning or pre-processing.</p>
+<h3>
+<a id="methods" class="anchor" href="#methods" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Methods</strong>
+</h3>
+<p>We plan to divide the project into two parts: a sentimental analysis model and a technical analysis model.</p>
+<p align="center">
+    <b>Sentiment Analysis Model</b>
+</p>   
+Bitcoin’s market value is largely driven by “hype” and speculative interest, creating uncertainty for many investors. However, sentiment analysis allows us to manage this uncertainty and quantify the public sentiments toward Bitcoin. 
+<p>The sentiment analysis model will be trained using supervised learning to generate a sentiment score for financial news headlines. [2] The training dataset will include an archive of headlines from ABC, Reddit, CNBC, the Guardian, and Reuters. Each headline in the dataset will be labeled with a positive or negative integer based on Bitcoin’s corresponding price change. Given a news headline, the sentiment analysis model will be able to accurately predict Bitcoin’s price change and put trades behind its predictions.</p>
+<p align="center">
+    <b>Technical Analysis Model</b>
+</p>
+The technical analysis model will use standard market indicators (e.g. Moving averages, MACD, and Bollinger Bands) as features to determine the optimal position for the trader to be in. These indicators will provide data on a continuous range, as opposed to a discrete range. This will not only tell the technical analysis model if an indicator is active or not, but also how strong it is. We plan to normalize the data before feeding it to the model. [3] 
+<p align="center">
+    <b>Combined Model</b>
+</p>
+The sentiment analysis model and the technical analysis model will be combined in such a way that if they agree on a course of action, the trader will take that action. If they disagree on a course of action, the trader will either liquidate its positions or take no action. [2][3]
+<h3>
+<a id="results--discussion" class="anchor" href="#results--discussion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Results &amp; Discussion</strong>
+</h3>
+<p align="center">
+    <b>Sentiment Analysis Model</b>
+</p>
+The sentiment analysis model was trained using supervised learning. The five training datasets were merged into a single training dataframe. Each headline in this dataframe was labeled  “-1” or  “1”, depending on whether bitcoin’s price fell or rose in the next week. The model used support vector machines from the sklearn library. For implementation, a simple tokenizer function was written to tokenize each headline into a list of words. Our model was trained over five separate training and testing ranges. 
+<p>The primary metric used to score the sentiment analysis model was the f1 score. The f1 score is a harmonic mean of the model’s precision and recall. A high f1 score indicates a low false positive rate and low false negative rate.</p>
+<p>The sentiment analysis model was trained and tested over five different time ranges.</p>
+<p>The first training range was September 2014 to January 2016. The testing range was the year 2016. Over this testing range, the model achieved an overall accuracy of 60%. Sklearn report:</p>
+<p>Training Range: 9-17-2014 to 1-1-2016 / Testing Range: 1-2-2016 to 12-31-2016</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>precision</th>
+<th>recall</th>
+<th>f1-score</th>
+<th>support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>0.36</td>
+<td>0.27</td>
+<td>0.31</td>
+<td>121</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.68</td>
+<td>0.76</td>
+<td>0.72</td>
+<td>243</td>
+</tr>
+<tr>
+<td>accuracy</td>
+<td></td>
+<td></td>
+<td>0.60</td>
+<td>364</td>
+</tr>
+<tr>
+<td>macro avg</td>
+<td>0.52</td>
+<td>0.52</td>
+<td>0.51</td>
+<td>364</td>
+</tr>
+<tr>
+<td>weighted avg</td>
+<td>0.57</td>
+<td>0.60</td>
+<td>0.58</td>
+<td>364</td>
+</tr>
+</tbody>
+</table>
+<p>The second training range was September 2014 to January 2017. The testing range was the year 2017. Over this testing range, the model achieved an overall accuracy of 75%. This increased accuracy would prove to be very useful at the time we integrated our sentiment and technical analysis models. Sklearn report:</p>
+<p>Training Range: 9-17-2014 to 1-1-2017 / Testing Range: 1-2-2017 to 12-31-2017</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>precision</th>
+<th>recall</th>
+<th>f1-score</th>
+<th>support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>0.38</td>
+<td>0.06</td>
+<td>0.10</td>
+<td>86</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.77</td>
+<td>0.97</td>
+<td>0.86</td>
+<td>277</td>
+</tr>
+<tr>
+<td>accuracy</td>
+<td></td>
+<td></td>
+<td>0.75</td>
+<td>363</td>
+</tr>
+<tr>
+<td>macro avg</td>
+<td>0.58</td>
+<td>0.51</td>
+<td>0.48</td>
+<td>363</td>
+</tr>
+<tr>
+<td>weighted avg</td>
+<td>0.68</td>
+<td>0.75</td>
+<td>0.68</td>
+<td>363</td>
+</tr>
+</tbody>
+</table>
+<p>The third training range was September 2014 to January 2018. The testing range was the year 2018. Over this testing range, the model achieved an overall accuracy of 36%. This was a notable drop in accuracy. Sklearn report:</p>
+<p>Training Range: 9-17-2014 to 1-1-2018 / Testing Range: 1-2-2018 to 12-31-2018</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>precision</th>
+<th>recall</th>
+<th>f1-score</th>
+<th>support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>0.46</td>
+<td>0.03</td>
+<td>0.05</td>
+<td>230</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.36</td>
+<td>0.95</td>
+<td>0.52</td>
+<td>133</td>
+</tr>
+<tr>
+<td>accuracy</td>
+<td></td>
+<td></td>
+<td>0.36</td>
+<td>363</td>
+</tr>
+<tr>
+<td>macro avg</td>
+<td>0.41</td>
+<td>0.49</td>
+<td>0.29</td>
+<td>363</td>
+</tr>
+<tr>
+<td>weighted avg</td>
+<td>0.42</td>
+<td>0.36</td>
+<td>0.22</td>
+<td>363</td>
+</tr>
+</tbody>
+</table>
+<p>The fourth training range was September 2014 to January 2019. The testing range was the year 2019. Over this testing range, the model achieved an overall accuracy of 44%. This was a slight increase in accuracy. Sklearn report:</p>
+<p>Training Range: 9-17-2014 to 1-1-2019 / Testing Range: 1-2-2019 to 12-31-2019</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>precision</th>
+<th>recall</th>
+<th>f1-score</th>
+<th>support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>0.41</td>
+<td>0.80</td>
+<td>0.55</td>
+<td>152</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.56</td>
+<td>0.19</td>
+<td>0.28</td>
+<td>211</td>
+</tr>
+<tr>
+<td>accuracy</td>
+<td></td>
+<td></td>
+<td>0.44</td>
+<td>363</td>
+</tr>
+<tr>
+<td>macro avg</td>
+<td>0.49</td>
+<td>0.49</td>
+<td>0.41</td>
+<td>363</td>
+</tr>
+<tr>
+<td>weighted avg</td>
+<td>0.50</td>
+<td>0.44</td>
+<td>0.39</td>
+<td>363</td>
+</tr>
+</tbody>
+</table>
+<p>The fifth and final training range was September 2014 to January 2020. The testing range was the year 2020. Over this testing range, the model achieved an overall accuracy of 61%. This was a great increase in accuracy. Sklearn report:</p>
+<p>Training Range: 9-17-2014 to 1-1-2020 / Testing Range: 1-2-2020 to 12-31-2020</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>precision</th>
+<th>recall</th>
+<th>f1-score</th>
+<th>support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>0.38</td>
+<td>0.29</td>
+<td>0.33</td>
+<td>119</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.69</td>
+<td>0.77</td>
+<td>0.73</td>
+<td>241</td>
+</tr>
+<tr>
+<td>accuracy</td>
+<td></td>
+<td></td>
+<td>0.61</td>
+<td>360</td>
+</tr>
+<tr>
+<td>macro avg</td>
+<td>0.54</td>
+<td>0.53</td>
+<td>0.53</td>
+<td>360</td>
+</tr>
+<tr>
+<td>weighted avg</td>
+<td>0.59</td>
+<td>0.61</td>
+<td>0.60</td>
+<td>360</td>
+</tr>
+</tbody>
+</table>
+<p>Overall, the sentiment analysis portion of the project was successful. We observed high f1 scores of 75% over 2017, 61% over 2020, and 60% over 2016. where there was relative stability in the cryptocurrency market. The slump in accuracy in 2018 and 2019 was likely due to Bitcoin’s volatility following Bitcoin’s first bull run at the end of 2017. We also observed that the model was better at predicting price increases over price decreases. This is likely due to the fact that Bitcoin’s price had an overall positive trend from 2016 to 2020. In training, the model likely mapped most word vectors to price increases. Therefore, when Bitcoin’s price decreased in the testing range, the model had lower accuracy, as it was trained to map word vectors to a price increase.</p>
+<p align="center">
+    <b>Technical Analysis Model</b>
+</p>
+<p>Data is fetched from Yahoo Finance and structured into a pandas/backtrader dataframe. A check is also performed to see if the desired data already exists on file and collects this data instead. If it is not present locally, the data is downloaded, otherwise it is simply read in from a file. This data is relatively clean already. The data is trained using sklearn BayseianRidge regression methods. Multiple models are run at a time using the different features (high,low, close, open, volume) from the Bitcoin dataframe presented above. This model then predicts the next price data for the given length provided. We use Backtrader indicators to make trading decisions and in order to make use of this data we extract the data from the indicators into dataframes. The extracted data is then fed into the simulated broker (cerebro) and iterated over. The indicators being used are Exponential Moving Average (EMA) and Bollinger-Bands (BB). Cerebro is the simulated broker that will facilitate the buying/selling of Bitcoin and calculate commissions. Cerebro is also capable of executing fractional share trades. The sentiment analysis portion of the project is also incorporated as an indicator.</p>
+<p>Initial tests of our technical analysis model were promising. The machine learning strategy consistently achieved higher profits compared to the non machine learning strategy over multiple validation ranges. With a $100,000 initial investment, these were our results:</p>
+<p>Training Range: 2014-1-1 to 2016-12-31 / Validation Range: 2017-1-1 to 2019-12-31</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Profit</th>
+<th>ROI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ML</td>
+<td>$11252.06</td>
+<td>11.25%</td>
+</tr>
+<tr>
+<td>Non ML</td>
+<td>$-34151.99</td>
+<td>-34.15%</td>
+</tr>
+</tbody>
+</table>
+<p>Training Range: 2014-1-1 to 2015-12-31 / Validation Range: 2016-1-1 to 2021-6-20</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Profit</th>
+<th>ROI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ML</td>
+<td>$13532.49</td>
+<td>13.53%</td>
+</tr>
+<tr>
+<td>Non ML</td>
+<td>$-55935.55</td>
+<td>-55.94%</td>
+</tr>
+</tbody>
+</table>
+<p>Training Range: 2014-1-1 to 2020-12-31 / Validation Range: 2021-1-1 to 2021-6-20</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Profit</th>
+<th>ROI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ML</td>
+<td>$11391.60</td>
+<td>11.39%</td>
+</tr>
+<tr>
+<td>Non ML</td>
+<td>$-19393.93</td>
+<td>-19.39%</td>
+</tr>
+</tbody>
+</table>
+<p>In all three validation ranges, the machine learning strategy consistently achieved higher profits and rates of return compared to the non-machine learning strategy.</p>
+<p>In order to further understand the predictive accuracy of the technical analysis model, the Root Mean Squared Error values were calculator for the three validation ranges. The results are shown below:</p>
+<p>Training Range: 2014-1-1 to 2016-12-31 / Validation Range: 2017-1-1 to 2019-12-31</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>RMSE</th>
+<th>R2 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top Bollinger Band</td>
+<td>184.26444394884894</td>
+<td>0.9980517959296775</td>
+</tr>
+<tr>
+<td>20-Day Moving Average</td>
+<td>73.62847530906953</td>
+<td>0.9995284125539151</td>
+</tr>
+<tr>
+<td>Bottom Bollinger Band</td>
+<td>164.21945972755142</td>
+<td>0.9964272331088015</td>
+</tr>
+<tr>
+<td>Closing Price</td>
+<td>695.6085991023549</td>
+<td>0.9587325905674069</td>
+</tr>
+</tbody>
+</table>
+<p>Training Range: 2014-1-1 to 2015-12-31 / Validation Range: 2016-1-1 to 2021-6-20</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>RMSE</th>
+<th>R2 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top Bollinger Band</td>
+<td>342.1590941440107</td>
+<td>0.9994323877733057</td>
+</tr>
+<tr>
+<td>20-Day Moving Average</td>
+<td>186.86660934498934</td>
+<td>0.9997726464124513</td>
+</tr>
+<tr>
+<td>Bottom Bollinger Band</td>
+<td>307.6827745720516</td>
+<td>0.9991500796328655</td>
+</tr>
+<tr>
+<td>Closing Price</td>
+<td>1251.0641374217896</td>
+<td>0.9901372811259308</td>
+</tr>
+</tbody>
+</table>
+<p>Training Range: 2014-1-1 to 2020-12-31 / Validation Range: 2021-1-1 to 2021-6-20</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>RMSE</th>
+<th>R2 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top Bollinger Band</td>
+<td>778.2982762267994</td>
+<td>0.9892454238701909</td>
+</tr>
+<tr>
+<td>20-Day Moving Average</td>
+<td>405.51782736035796</td>
+<td>0.9968194638932137</td>
+</tr>
+<tr>
+<td>Bottom Bollinger Band</td>
+<td>808.0445726345929</td>
+<td>0.9906568923442578</td>
+</tr>
+<tr>
+<td>Closing Price</td>
+<td>3662.666692120174</td>
+<td>0.8222124682031661</td>
+</tr>
+</tbody>
+</table>
+<p>The results indicate that the technical analysis model is very accurate at predicting the values of the bollinger bands and the 20-day moving average. It is not as accurate at predicting the closing price, as we calculated much higher Root Mean Squared Error values. The reason for this is likely due to the fact that the closing price is far more volatile and unpredictable. Meanwhile, the moving average and bollinger bands more stable and more easily predictable, as they smooth out the fluctuations in the closing price.</p>
+<p>The machine learning strategy was tested against the non machine learning strategy. Machine learning metrics were run on both, and we found that the machine learning strategy outperformed the non-machine learning strategy in terms of daily, weekly, monthly, annual, and cumulative returns. The machine learning strategy also minimized losses during periods of drawdown. The comparison between the machine learning strategy (on the left) versus the non-machine learning strategy (on the right) is shown below.</p>
+
+  <table>
+    <tr>
+      <td>
+        <img src="images/ts_ML.png" alt="tsML">
+      </td>
+      <td>
+        <img src="images/ts_NO_ML.png" alt="tsNOML">
+      </td>
+    </tr>
+  </table>
+
+<p align="center">
+    <b>Combined Model</b>
+</p>
+The technical and sentiment analysis models were integrated together to create our trading strategy.  
+<p>In our strategy, the trader enters a position based on the technical analysis model. The trader checks the sentiment every 14 days. On evaluation, if the previous sentiment evaluation was shown to be incorrect, that is, the price of bitcoin did not move as predicted, the trader will exit its current position and check again on the next bar. If the sentiment has shown to be correct and the new sentiment prediction matches the old prediction, the trader will increase the size of its current position. If the previous sentiment has shown to be correct and the current sentiment does not match the previous sentiment, the trader will reverse its position.</p>
+<p>We ran our strategy over 2016, 2017, 2018, 2019, and 2020 and tested it against a strategy using random sentiment evaluation. The comparison between our strategy (on the left) versus the random sentiment strategy (on the right) for each of the five years is shown below.</p>
+<p>In 2016, our model ended with a balance of $131412.33 after commissions were paid to the brokerage. Meanwhile, the random sentiment model ended with a balance of $40,328.66.</p>
+
+  <table>
+    <tr>
+      <td>
+        <img src="train%20until%202016%20test%20on%202016.png" alt="tsML">
+      </td>
+      <td>
+        <img src="Random%20Sentiment%20train%20until%202016%20test%20on%202016.png" alt="tsRand">
+      </td>
+    </tr>
+  </table>
+
+<p>In 2017, our model ended with a balance of $1492812.55 after commissions were paid to the brokerage. Meanwhile, the random sentiment model ended with a balance of $142.00.</p>
+
+  <table>
+    <tr>
+      <td>
+        <img src="train%20until%202017%20test%20on%202017.png" alt="tsML">
+      </td>
+      <td>
+        <img src="Random%20Sentiment%20train%20until%202017%20test%20on%202017.png" alt="tsRand">
+      </td>
+    </tr>
+  </table>
+
+<p>In 2018, our model ended with a balance of $49251.31 after commissions were paid to the brokerage. Meanwhile, the random sentiment model ended with a balance of $40524.79.</p>
+
+  <table>
+    <tr>
+      <td>
+        <img src="train%20until%202018%20test%20on%202018.png" alt="tsML">
+      </td>
+      <td>
+        <img src="Random%20Sentiment%20train%20until%202018%20test%20on%202018.png" alt="tsRand">
+      </td>
+    </tr>
+  </table>
+
+<p>In 2019, our model ended with a balance of $-13037.66 after commissions were paid to the brokerage. Meanwhile, the random sentiment model ended with a balance of $96064.58.</p>
+
+  <table>
+    <tr>
+      <td>
+        <img src="train%20until%202019%20test%20on%202019.png" alt="tsML">
+      </td>
+      <td>
+        <img src="Random%20Sentiment%20train%20until%202019%20test%20on%202019.png" alt="tsRand">
+      </td>
+    </tr>
+  </table>
+
+<p>In 2020, our model ended with a balance of $536860.64 after commissions were paid to the brokerage. Meanwhile, the random sentiment model ended with a balance of $10399.43.</p>
+
+  <table>
+    <tr>
+      <td>
+        <img src="train%20until%202020%20test%20on%202020.png" alt="tsML">
+      </td>
+      <td>
+        <img src="Random%20Sentiment%20train%20until%202020%20test%20on%202020.png" alt="tsRand">
+      </td>
+    </tr>
+  </table>
+
+<p>Our strategy outperformed the strategy employing random sentiment by a considerable margin. It increased the original investment of $100,000 by 1400% in 2017, 500% in 2020, and 13% in 2016. In 2018 and 2019 however, the strategy lost money. This makes sense, as the sentiment analysis model was not very accurate for 2018 and 2019. Overall, we believe that combining technical and sentiment analysis together in our strategy was a success.</p>
+<h3>
+<a id="conclusion" class="anchor" href="#conclusion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Conclusion</strong>
+</h3>
+<p>The sentiment analysis model helped us classify word vectors generated from news headlines to predict Bitcoin’s price changes. Achieving accuracy rates of 60%, 75%, 36%, 44%, and 61% in 2016, 2017, 2018, 2019, and 2020 respectively, we were amazed by how accurately the model was able to predict Bitcoin’s price change in each given year. We believe that the low accuracies in 2018 and 2019 are due to increased volatility in those years.</p>
+<p>The technical analysis model helped us predict the future values  of the price moving average, bollinger bands, and closing price of Bitcoin. This allowed us to determine the best buy and sell points for Bitcoin. Achieving high profits and low RMSE values in our predictions, we found the model to be very accurate. We determined that the higher RMSE value for closing price was due to the increased volatility of the closing price, compared to the smoother moving average and bollinger bands.</p>
+<p>Finally, the integration of sentiment and technical analysis into a single strategy was a great success. Having a 1400% rate of return in 2017, a 500% rate of return in 2020, and a 13% rate of return in 2016, this strategy outclassed the non-machine learning strategy by a considerable margin.</p>
+<p>After reviewing our findings, we believe that machine learning is a remarkable tool in sentiment and technical analysis. It helps us manage the uncertainty surrounding Bitcoin, and helps us identify trends that human traders cannot see.</p>
+<p>On a personal note, we learned a lot about machine learning in this project, and we had a ton of fun working on it. Thank you so much!</p>
+<h3>
+<a id="references" class="anchor" href="#references" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>References</strong>
+</h3>
+<p>[1] Staff of the U.S. Securities and Exchange Commission (August 5, 2020) “Staff Report on Algorithmic Trading in U.S. Capital Markets”, Available at: <a href="https://www.sec.gov/files/Algo_Trading_Report_2020.pdf">https://www.sec.gov/files/Algo_Trading_Report_2020.pdf</a> (Accessed: Monday, June 7, 2021).</p>
+<p>[2] Abraham, Jethin; Higdon, Daniel; Nelson, John; and Ibarra, Juan (2018) "Cryptocurrency Price Prediction Using Tweet Volumes and Sentiment Analysis," SMU Data Science Review: Vol. 1 : No. 3, Article 1.Available at: <a href="https://scholar.smu.edu/datasciencereview/vol1/iss3/1">https://scholar.smu.edu/datasciencereview/vol1/iss3/1</a>
+(Accessed: Thursday, June 10, 2021).</p>
+<p>[3] Shah, D., &amp; Zhang, K. (2014, October). Bayesian regression and Bitcoin. <a href="https://devavrat.mit.edu/wp-content/uploads/2017/11/Bayesian-regression-and-Bitcoin.pdf">https://devavrat.mit.edu/wp-content/uploads/2017/11/Bayesian-regression-and-Bitcoin.pdf</a>
+(Accessed: Thursday, June 10, 2021).</p>
+<h3>
+<a id="team-members" class="anchor" href="#team-members" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Team Members</strong>
+</h3>
+<ul>
+<li>Ben Podrazhansky</li>
+<li>Dylan Kynoch</li>
+<li>Atharva Desai</li>
+<li>Nicholas Oyebanji</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.gatech.edu/noyebanji8/bitcoin_analysis_group.io">Machine Learning for Bitcoin Analysis</a> is maintained by <a href="https://github.gatech.edu/noyebanji8">noyebanji8</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
